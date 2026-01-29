@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Pedidos Online</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cor-primaria: #f97316;
+            --cor-secundaria: #ef4444;
+            --cor-texto: #1f2937;
+            --cor-fundo: #f9fafb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--cor-fundo);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(to right, var(--cor-primaria), var(--cor-secundaria));
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .logo-container {
+            width: 50px;
+            height: 50px;
+            border-radius: 0.5rem;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .logo-placeholder {
+            font-size: 1.5rem;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            flex: 1;
+        }
+
+        .admin-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.2s;
+        }
+
+        .admin-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 0.75rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.5rem 0.5rem 0.5rem 2.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .categories {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .categories::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-btn {
+            padding: 0.25rem 1rem;
+            border-radius: 9999px;
+            border: none;
+            white-space: nowrap;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-btn.active {
+            background: white;
+            color: var(--cor-primaria);
+        }
+
+        .category-btn:not(.active) {
+            background: var(--cor-primaria);
+            color: white;
+        }
+
+        /* Produtos */
+        .products-container {
+            padding: 1rem;
+            padding-bottom: 6rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .product-content {
+            display: flex;
+        }
+
+        .product-image {
+            width: 96px;
+            height: 96px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to bottom right, #fed7aa, #fecaca);
+            font-size: 3rem;
+            flex-shrink: 0;
+        }
+
+        .product-info {
+            flex: 1;
+            padding: 0.75rem;
+        }
+
+        .product-name {
+            font-weight: bold;
+            color: var(--cor-texto);
+            margin-bottom: 0.25rem;
+        }
+
+        .product-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--cor-primaria);
+        }
+
+        .btn-add {
+            background: var(--cor-primaria);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.2s;
+        }
+
+        .btn-add:active {
+            opacity: 0.8;
+        }
+
+        /* Botão flutuante do carrinho */
+        .cart-float {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: var(--cor-primaria);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--cor-secundaria);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Carrinho */
+        .cart-item {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .cart-item-header {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .cart-item-image {
+            font-size: 2.5rem;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: bold;
+            color: var(--cor-texto);
+        }
+
+        .cart-item-desc {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0.25rem 0;
+        }
+
+        .cart-item-price {
+            font-size: 1.125rem;
+            font-weight: bold;
+            color: var(--cor-primaria);
+        }
+
+        .btn-remove {
+            color: var(--cor-secundaria);
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            background: #f3f4f6;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+        }
+
+        .btn-qty {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            color: var(--cor-primaria);
+            font-size: 1.25rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .quantity-display {
+            font-weight: bold;
+            font-size: 1.125rem;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .cart-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 1rem;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .cart-total-label {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .cart-total-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--cor-primaria);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--cor-primaria);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-size: 1.125rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary:not(:disabled):active {
+            opacity: 0.8;
+        }
+
+        /* Checkout */
+        .checkout-container {
+            padding: 1rem;
+            padding-bottom: 2rem;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--cor-texto);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--cor-texto);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .payment-option:has(input:checked) {
+            border-color: var(--cor-primaria);
+            background: #fff7ed;
+        }
+
+        .payment-option input {
+            margin-right: 0.75rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0 0;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .summary-total .value {
+            color: var(--cor-primaria);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-text {
+            color: #6b7280;
+            font-size: 1.125rem;
+        }
+
+        .confirmation-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .confirmation-title {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: var(--cor-texto);
+            margin-bottom: 0.5rem;
+        }
+
+        .confirmation-text {
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        /* PAINEL ADMIN */
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .admin-modal {
+            background: white;
+            border-radius: 1rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .admin-header {
+            background: linear-gradient(to right, var(--cor-primaria), var(--cor-secundaria));
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .btn-close {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-content {
+            padding: 1.5rem;
+        }
+
+        .admin-section {
+            margin-bottom: 2rem;
+        }
+
+        .admin-section h3 {
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+            color: var(--cor-texto);
+            border-bottom: 2px solid var(--cor-primaria);
+            padding-bottom: 0.5rem;
+        }
+
+        .color-input-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .color-input-group label {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .color-input-group input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+
+        .color-input-group input[type="text"] {
+            width: 100px;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+        }
+
+        .logo-upload {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .logo-preview {
+            width: 100px;
+            height: 100px;
+            border: 2px dashed #d1d5db;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .btn-upload {
+            background: #6b7280;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-save {
+            background: var(--cor-primaria);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.125rem;
+            width: 100%;
+        }
+
+        .whatsapp-config {
+            background: #f3f4f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .whatsapp-config label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .whatsapp-config input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .whatsapp-config .help-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .produto-form {
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .produto-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .produto-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de Catálogo -->
+    <div id="tela-catalogo">
+        <div class="header">
+            <div class="header-content">
+                <div class="logo-container" id="logo-display">
+                    <span class="logo-placeholder">🍕</span>
+                </div>
+                <h1 id="nome-empresa">Meu Restaurante</h1>
+                <button class="admin-btn" onclick="mostrarLoginAdmin()">⚙️ Admin</button>
+            </div>
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input 
+                    type="text" 
+                    placeholder="Buscar produtos..."
+                    oninput="buscarProdutos(this.value)"
+                >
+            </div>
+            <div class="categories" id="categories-container"></div>
+        </div>
+        <div class="products-container" id="products-container"></div>
+        <button class="cart-float hidden" id="cart-button" onclick="mudarTela('carrinho')">
+            🛒
+            <span class="cart-badge" id="cart-badge">0</span>
+        </button>
+    </div>
+
+    <!-- Tela de Carrinho -->
+    <div id="tela-carrinho" class="hidden">
+        <div class="header">
+            <div class="header-content">
+                <button class="admin-btn" onclick="mudarTela('catalogo')">← Voltar</button>
+                <h1>Meu Carrinho</h1>
+            </div>
+        </div>
+        <div class="products-container" id="cart-items-container"></div>
+        <div class="cart-footer hidden" id="cart-footer">
+            <div class="cart-total-row">
+                <span class="cart-total-label">Total:</span>
+                <span class="cart-total-value" id="cart-total">R$ 0,00</span>
+            </div>
+            <button class="btn-primary" onclick="mudarTela('checkout')">
+                Finalizar Pedido
+            </button>
+        </div>
+    </div>
+
+    <!-- Tela de Checkout -->
+    <div id="tela-checkout" class="hidden">
+        <div class="header">
+            <div class="header-content">
+                <button class="admin-btn" onclick="mudarTela('carrinho')">← Voltar</button>
+                <h1>Finalizar Pedido</h1>
+            </div>
+        </div>
+        <div class="checkout-container">
+            <div class="form-section">
+                <h2>📍 Dados de Entrega</h2>
+                <div class="form-group">
+                    <label>Nome completo</label>
+                    <input type="text" id="input-nome" placeholder="Digite seu nome">
+                </div>
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="tel" id="input-telefone" placeholder="(00) 00000-0000">
+                </div>
+                <div class="form-group">
+                    <label>Endereço completo</label>
+                    <textarea id="input-endereco" placeholder="Rua, número, bairro, complemento"></textarea>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>💳 Forma de Pagamento</h2>
+                <div class="payment-options">
+                    <label class="payment-option">
+                        <input type="radio" name="pagamento" value="Dinheiro" checked>
+                        <span>💵 Dinheiro</span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="pagamento" value="Cartão">
+                        <span>💳 Cartão</span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="pagamento" value="PIX">
+                        <span>📱 PIX</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>📝 Observações</h2>
+                <div class="form-group">
+                    <textarea id="input-observacoes" placeholder="Alguma observação sobre seu pedido?"></textarea>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>📦 Resumo do Pedido</h2>
+                <div id="checkout-summary"></div>
+            </div>
+
+            <button class="btn-primary" id="btn-finalizar" onclick="finalizarPedido()" disabled>
+                Enviar Pedido via WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <!-- Tela de Confirmação -->
+    <div id="tela-confirmacao" class="hidden">
+        <div class="header">
+            <h1>Pedido Enviado!</h1>
+        </div>
+        <div class="empty-state">
+            <div class="confirmation-icon">✅</div>
+            <h2 class="confirmation-title">Pedido Realizado!</h2>
+            <p class="confirmation-text">
+                Seu pedido foi enviado via WhatsApp.<br>
+                Em breve entraremos em contato!
+            </p>
+            <button class="btn-primary" onclick="novoPedido()" style="max-width: 250px; margin: 0 auto;">
+                Fazer Novo Pedido
+            </button>
+        </div>
+    </div>
+
+    <!-- Painel Admin -->
+    <div id="admin-panel" class="admin-panel hidden">
+        <div class="admin-modal">
+            <!-- Login Admin -->
+            <div id="admin-login" class="hidden">
+                <div class="admin-header">
+                    <h2>🔐 Login Administrativo</h2>
+                    <button class="btn-close" onclick="fecharAdmin()">✕</button>
+                </div>
+                <div class="admin-content">
+                    <div class="login-form">
+                        <input type="password" id="senha-admin" placeholder="Digite a senha de administrador">
+                        <button class="btn-primary" onclick="fazerLoginAdmin()">Entrar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configurações Admin -->
+            <div id="admin-config" class="hidden">
+                <div class="admin-header">
+                    <h2>⚙️ Painel Administrativo</h2>
+                    <button class="btn-close" onclick="fecharAdmin()">✕</button>
+                </div>
+                <div class="admin-content">
+                    <!-- Personalização Visual -->
+                    <div class="admin-section">
+                        <h3>🎨 Personalização Visual</h3>
+                        
+                        <div class="form-group">
+                            <label>Nome da Empresa</label>
+                            <input type="text" id="admin-nome-empresa" placeholder="Nome do seu negócio">
+                        </div>
+
+                        <div class="logo-upload">
+                            <label style="font-weight: 500;">Logo da Empresa</label>
+                            <div class="logo-preview" id="admin-logo-preview">
+                                <span style="color: #9ca3af;">Sem logo</span>
+                            </div>
+                            <input type="file" id="admin-logo-input" accept="image/*" style="display: none;" onchange="carregarLogo(this)">
+                            <button class="btn-upload" onclick="document.getElementById('admin-logo-input').click()">
+                                Carregar Logo
+                            </button>
+                        </div>
+
+                        <div class="color-input-group">
+                            <label>Cor Primária</label>
+                            <input type="color" id="admin-cor-primaria" value="#f97316">
+                            <input type="text" id="admin-cor-primaria-hex" value="#f97316" readonly>
+                        </div>
+
+                        <div class="color-input-group">
+                            <label>Cor Secundária</label>
+                            <input type="color" id="admin-cor-secundaria" value="#ef4444">
+                            <input type="text" id="admin-cor-secundaria-hex" value="#ef4444" readonly>
+                        </div>
+                    </div>
+
+                    <!-- WhatsApp -->
+                    <div class="admin-section">
+                        <h3>📱 Configuração WhatsApp</h3>
+                        <div class="whatsapp-config">
+                            <label>Número do WhatsApp (com DDD)</label>
+                            <input type="tel" id="admin-whatsapp" placeholder="85999999999" maxlength="11">
+                            <p class="help-text">
+                                Digite apenas números. Ex: 85999999999<br>
+                                Os pedidos serão enviados automaticamente para este número.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Gerenciar Produtos -->
+                    <div class="admin-section">
+                        <h3>🍕 Gerenciar Produtos</h3>
+                        <button class="btn-secondary" onclick="mostrarFormProduto()">+ Adicionar Produto</button>
+                        
+                        <div id="form-produto" class="produto-form hidden">
+                            <h4 style="margin-bottom: 1rem;">Novo Produto</h4>
+                            <div class="form-group">
+                                <label>Nome</label>
+                                <input type="text" id="produto-nome">
+                            </div>
+                            <div class="form-group">
+                                <label>Descrição</label>
+                                <input type="text" id="produto-descricao">
+                            </div>
+                            <div class="form-group">
+                                <label>Preço (R$)</label>
+                                <input type="number" id="produto-preco" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Categoria</label>
+                                <input type="text" id="produto-categoria">
+                            </div>
+                            <div class="form-group">
+                                <label>Emoji</label>
+                                <input type="text" id="produto-imagem" placeholder="🍕" maxlength="2">
+                            </div>
+                            <button class="btn-primary" onclick="adicionarProduto()">Adicionar</button>
+                            <button class="btn-secondary" onclick="cancelarProduto()" style="width: 100%; margin-top: 0.5rem;">Cancelar</button>
+                        </div>
+
+                        <div class="produto-lista" id="lista-produtos"></div>
+                    </div>
+
+                    <!-- Alterar Senha -->
+                    <div class="admin-section">
+                        <h3>🔒 Alterar Senha Admin</h3>
+                        <div class="form-group">
+                            <label>Nova Senha</label>
+                            <input type="password" id="admin-nova-senha" placeholder="Digite a nova senha">
+                        </div>
+                        <button class="btn-secondary" onclick="alterarSenhaAdmin()">Alterar Senha</button>
+                    </div>
+
+                    <button class="btn-save" onclick="salvarConfiguracoes()">💾 Salvar Todas as Configurações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado Global
+        let carrinho = [];
+        let categoriaAtual = 'Todos';
+        let termoBusca = '';
+        let PRODUTOS = [
+            { id: 1, nome: 'Pizza Margherita', descricao: 'Molho, mussarela e manjericão', preco: 35.00, categoria: 'Pizzas', imagem: '🍕' },
+            { id: 2, nome: 'Pizza Calabresa', descricao: 'Molho, mussarela e calabresa', preco: 38.00, categoria: 'Pizzas', imagem: '🍕' },
+            { id: 3, nome: 'X-Burger', descricao: 'Hambúrguer com queijo e salada', preco: 25.00, categoria: 'Lanches', imagem: '🍔' },
+            { id: 4, nome: 'X-Bacon', descricao: 'Hambúrguer com bacon e queijo', preco: 28.00, categoria: 'Lanches', imagem: '🍔' },
+            { id: 5, nome: 'Refrigerante Lata', descricao: 'Coca-Cola, Guaraná ou Sprite', preco: 5.00, categoria: 'Bebidas', imagem: '🥤' },
+            { id: 6, nome: 'Suco Natural', descricao: 'Laranja, Limão ou Morango', preco: 8.00, categoria: 'Bebidas', imagem: '🧃' }
+        ];
+
+        // Configurações Admin
+        let CONFIG = {
+            nomeEmpresa: 'Meu Restaurante',
+            logo: '',
+            corPrimaria: '#f97316',
+            corSecundaria: '#ef4444',
+            whatsapp: '',
+            senhaAdmin: 'admin123'
+        };
+
+        // Inicialização
+        window.onload = function() {
+            carregarConfiguracoes();
+            carregarProdutos();
+            carregarCarrinho();
+            aplicarTema();
+            atualizarBadgeCarrinho();
+            mudarTela('catalogo');
+        };
+
+        // Gerenciamento de Telas
+        function mudarTela(tela) {
+            document.getElementById('tela-catalogo').classList.add('hidden');
+            document.getElementById('tela-carrinho').classList.add('hidden');
+            document.getElementById('tela-checkout').classList.add('hidden');
+            document.getElementById('tela-confirmacao').classList.add('hidden');
+
+            document.getElementById('tela-' + tela).classList.remove('hidden');
+
+            if (tela === 'catalogo') {
+                renderizarCategorias();
+                renderizarProdutos();
+            } else if (tela === 'carrinho') {
+                renderizarCarrinho();
+            } else if (tela === 'checkout') {
+                renderizarCheckout();
+            }
+        }
+
+        // Busca e Filtros
+        function buscarProdutos(termo) {
+            termoBusca = termo;
+            renderizarProdutos();
+        }
+
+        function filtrarCategoria(categoria) {
+            categoriaAtual = categoria;
+            renderizarCategorias();
+            renderizarProdutos();
+        }
+
+        function renderizarCategorias() {
+            const categorias = ['Todos', ...new Set(PRODUTOS.map(p => p.categoria))];
+            const container = document.getElementById('categories-container');
+            
+            container.innerHTML = categorias.map(cat => `
+                <button 
+                    class="category-btn ${cat === categoriaAtual ? 'active' : ''}"
+                    onclick="filtrarCategoria('${cat}')"
+                >
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function renderizarProdutos() {
+            const container = document.getElementById('products-container');
+            
+            const produtosFiltrados = PRODUTOS.filter(produto => {
+                const matchBusca = produto.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
+                                  produto.descricao.toLowerCase().includes(termoBusca.toLowerCase());
+                const matchCategoria = categoriaAtual === 'Todos' || produto.categoria === categoriaAtual;
+                return matchBusca && matchCategoria;
+            });
+
+            if (produtosFiltrados.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <p class="empty-text">Nenhum produto encontrado</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = produtosFiltrados.map(produto => `
+                <div class="product-card">
+                    <div class="product-content">
+                        <div class="product-image">${produto.imagem}</div>
+                        <div class="product-info">
+                            <h3 class="product-name">${produto.nome}</h3>
+                            <p class="product-description">${produto.descricao}</p>
+                            <div class="product-footer">
+                                <span class="product-price">R$ ${produto.preco.toFixed(2)}</span>
+                                <button class="btn-add" onclick="adicionarAoCarrinho(${produto.id})">
+                                    <span>+</span>
+                                    <span>Adicionar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Carrinho
+        function adicionarAoCarrinho(produtoId) {
+            const produto = PRODUTOS.find(p => p.id === produtoId);
+            const itemExistente = carrinho.find(item => item.id === produtoId);
+
+            if (itemExistente) {
+                itemExistente.quantidade++;
+            } else {
+                carrinho.push({ ...produto, quantidade: 1 });
+            }
+
+            salvarCarrinho();
+            atualizarBadgeCarrinho();
+            
+            // Feedback visual
+            const btn = event.target.closest('.btn-add');
+            btn.style.transform = 'scale(0.9)';
+            setTimeout(() => btn.style.transform = 'scale(1)', 100);
+        }
+
+        function alterarQuantidade(produtoId, delta) {
+            const item = carrinho.find(i => i.id === produtoId);
+            if (item) {
+                item.quantidade += delta;
+                if (item.quantidade <= 0) {
+                    removerDoCarrinho(produtoId);
+                } else {
+                    salvarCarrinho();
+                    renderizarCarrinho();
+                }
+            }
+        }
+
+        function removerDoCarrinho(produtoId) {
+            carrinho = carrinho.filter(item => item.id !== produtoId);
+            salvarCarrinho();
+            atualizarBadgeCarrinho();
+            renderizarCarrinho();
+        }
+
+        function calcularTotal() {
+            return carrinho.reduce((total, item) => total + (item.preco * item.quantidade), 0);
+        }
+
+        function atualizarBadgeCarrinho() {
+            const totalItens = carrinho.reduce((sum, item) => sum + item.quantidade, 0);
+            const badge = document.getElementById('cart-badge');
+            const button = document.getElementById('cart-button');
+            
+            badge.textContent = totalItens;
+            
+            if (totalItens > 0) {
+                button.classList.remove('hidden');
+            } else {
+                button.classList.add('hidden');
+            }
+        }
+
+        function renderizarCarrinho() {
+            const container = document.getElementById('cart-items-container');
+            const footer = document.getElementById('cart-footer');
+            const totalElement = document.getElementById('cart-total');
+
+            if (carrinho.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🛒</div>
+                        <p class="empty-text">Seu carrinho está vazio</p>
+                        <button class="btn-primary" onclick="mudarTela('catalogo')" style="max-width: 200px; margin: 1rem auto;">
+                            Ver Produtos
+                        </button>
+                    </div>
+                `;
+                footer.classList.add('hidden');
+                return;
+            }
+
+            footer.classList.remove('hidden');
+            totalElement.textContent = `R$ ${calcularTotal().toFixed(2)}`;
+
+            container.innerHTML = carrinho.map(item => `
+                <div class="cart-item">
+                    <div class="cart-item-header">
+                        <div class="cart-item-image">${item.imagem}</div>
+                        <div class="cart-item-info">
+                            <h3 class="cart-item-name">${item.nome}</h3>
+                            <p class="cart-item-desc">${item.descricao}</p>
+                            <p class="cart-item-price">R$ ${(item.preco * item.quantidade).toFixed(2)}</p>
+                        </div>
+                        <button class="btn-remove" onclick="removerDoCarrinho(${item.id})">🗑️</button>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="btn-qty" onclick="alterarQuantidade(${item.id}, -1)">−</button>
+                        <span class="quantity-display">${item.quantidade}</span>
+                        <button class="btn-qty" onclick="alterarQuantidade(${item.id}, 1)">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Checkout
+        function renderizarCheckout() {
+            const summaryContainer = document.getElementById('checkout-summary');
+            
+            summaryContainer.innerHTML = carrinho.map(item => `
+                <div class="summary-item">
+                    <span>${item.quantidade}x ${item.nome}</span>
+                    <span>R$ ${(item.preco * item.quantidade).toFixed(2)}</span>
+                </div>
+            `).join('') + `
+                <div class="summary-total">
+                    <span>Total:</span>
+                    <span class="value">R$ ${calcularTotal().toFixed(2)}</span>
+                </div>
+            `;
+
+            const inputs = ['input-nome', 'input-telefone', 'input-endereco'];
+            inputs.forEach(id => {
+                const input = document.getElementById(id);
+                input.removeEventListener('input', validarFormulario);
+                input.addEventListener('input', validarFormulario);
+            });
+            validarFormulario();
+        }
+
+        function validarFormulario() {
+            const nome = document.getElementById('input-nome').value.trim();
+            const telefone = document.getElementById('input-telefone').value.trim();
+            const endereco = document.getElementById('input-endereco').value.trim();
+            const btnFinalizar = document.getElementById('btn-finalizar');
+
+            btnFinalizar.disabled = !(nome && telefone && endereco);
+        }
+
+        function finalizarPedido() {
+            if (!CONFIG.whatsapp) {
+                alert('⚠️ Número do WhatsApp não configurado! Por favor, configure no painel administrativo.');
+                return;
+            }
+
+            const dados = {
+                nome: document.getElementById('input-nome').value,
+                telefone: document.getElementById('input-telefone').value,
+                endereco: document.getElementById('input-endereco').value,
+                pagamento: document.querySelector('input[name="pagamento"]:checked').value,
+                observacoes: document.getElementById('input-observacoes').value,
+                itens: carrinho,
+                total: calcularTotal()
+            };
+
+            // Montar mensagem para WhatsApp
+            let mensagem = `🛒 *NOVO PEDIDO*\n\n`;
+            mensagem += `👤 *Cliente:* ${dados.nome}\n`;
+            mensagem += `📱 *Telefone:* ${dados.telefone}\n`;
+            mensagem += `📍 *Endereço:* ${dados.endereco}\n`;
+            mensagem += `💳 *Pagamento:* ${dados.pagamento}\n\n`;
+            mensagem += `📦 *Itens do Pedido:*\n`;
+            
+            dados.itens.forEach(item => {
+                mensagem += `\n• ${item.quantidade}x ${item.nome}\n`;
+                mensagem += `  R$ ${item.preco.toFixed(2)} = R$ ${(item.preco * item.quantidade).toFixed(2)}\n`;
+            });
+            
+            mensagem += `\n💰 *Total: R$ ${dados.total.toFixed(2)}*`;
+            
+            if (dados.observacoes) {
+                mensagem += `\n\n📝 *Observações:* ${dados.observacoes}`;
+            }
+
+            // Enviar para WhatsApp
+            const whatsappUrl = `https://wa.me/55${CONFIG.whatsapp}?text=${encodeURIComponent(mensagem)}`;
+            window.open(whatsappUrl, '_blank');
+
+            // Limpar carrinho e formulário
+            carrinho = [];
+            salvarCarrinho();
+            atualizarBadgeCarrinho();
+            document.getElementById('input-nome').value = '';
+            document.getElementById('input-telefone').value = '';
+            document.getElementById('input-endereco').value = '';
+            document.getElementById('input-observacoes').value = '';
+
+            mudarTela('confirmacao');
+        }
+
+        function novoPedido() {
+            mudarTela('catalogo');
+        }
+
+        // Storage
+        function salvarCarrinho() {
+            try {
+                localStorage.setItem('carrinho', JSON.stringify(carrinho));
+            } catch (e) {
+                console.log('Erro ao salvar carrinho:', e);
+            }
+        }
+
+        function carregarCarrinho() {
+            try {
+                const carrinhoSalvo = localStorage.getItem('carrinho');
+                if (carrinhoSalvo) {
+                    carrinho = JSON.parse(carrinhoSalvo);
+                }
+            } catch (e) {
+                console.log('Erro ao carregar carrinho:', e);
+                carrinho = [];
+            }
+        }
+
+        function salvarConfiguracoes() {
+            try {
+                localStorage.setItem('config', JSON.stringify(CONFIG));
+                localStorage.setItem('produtos', JSON.stringify(PRODUTOS));
+                alert('✅ Configurações salvas com sucesso!');
+                aplicarTema();
+                renderizarProdutos();
+                renderizarCategorias();
+            } catch (e) {
+                alert('❌ Erro ao salvar configurações: ' + e.message);
+            }
+        }
+
+        function carregarConfiguracoes() {
+            try {
+                const configSalva = localStorage.getItem('config');
+                if (configSalva) {
+                    CONFIG = JSON.parse(configSalva);
+                }
+            } catch (e) {
+                console.log('Erro ao carregar configurações:', e);
+            }
+        }
+
+        function salvarProdutos() {
+            try {
+                localStorage.setItem('produtos', JSON.stringify(PRODUTOS));
+            } catch (e) {
+                console.log('Erro ao salvar produtos:', e);
+            }
+        }
+
+        function carregarProdutos() {
+            try {
+                const produtosSalvos = localStorage.getItem('produtos');
+                if (produtosSalvos) {
+                    PRODUTOS = JSON.parse(produtosSalvos);
+                }
+            } catch (e) {
+                console.log('Erro ao carregar produtos:', e);
+            }
+        }
+
+        // Painel Admin
+        function mostrarLoginAdmin() {
+            document.getElementById('admin-panel').classList.remove('hidden');
+            document.getElementById('admin-login').classList.remove('hidden');
+            document.getElementById('admin-config').classList.add('hidden');
+            document.getElementById('senha-admin').value = '';
+            document.getElementById('senha-admin').focus();
+        }
+
+        function fazerLoginAdmin() {
+            const senha = document.getElementById('senha-admin').value;
+            if (senha === CONFIG.senhaAdmin) {
+                document.getElementById('admin-login').classList.add('hidden');
+                document.getElementById('admin-config').classList.remove('hidden');
+                carregarDadosAdmin();
+            } else {
+                alert('❌ Senha incorreta!');
+            }
+        }
+
+        function carregarDadosAdmin() {
+            document.getElementById('admin-nome-empresa').value = CONFIG.nomeEmpresa;
+            document.getElementById('admin-cor-primaria').value = CONFIG.corPrimaria;
+            document.getElementById('admin-cor-primaria-hex').value = CONFIG.corPrimaria;
+            document.getElementById('admin-cor-secundaria').value = CONFIG.corSecundaria;
+            document.getElementById('admin-cor-secundaria-hex').value = CONFIG.corSecundaria;
+            document.getElementById('admin-whatsapp').value = CONFIG.whatsapp;
+
+            if (CONFIG.logo) {
+                document.getElementById('admin-logo-preview').innerHTML = `<img src="${CONFIG.logo}" alt="Logo">`;
+            }
+
+            // Listeners para cores
+            document.getElementById('admin-cor-primaria').addEventListener('input', function(e) {
+                document.getElementById('admin-cor-primaria-hex').value = e.target.value;
+                CONFIG.corPrimaria = e.target.value;
+                aplicarTema();
+            });
+
+            document.getElementById('admin-cor-secundaria').addEventListener('input', function(e) {
+                document.getElementById('admin-cor-secundaria-hex').value = e.target.value;
+                CONFIG.corSecundaria = e.target.value;
+                aplicarTema();
+            });
+
+            // Nome empresa
+            document.getElementById('admin-nome-empresa').addEventListener('input', function(e) {
+                CONFIG.nomeEmpresa = e.target.value;
+                document.getElementById('nome-empresa').textContent = e.target.value;
+            });
+
+            // WhatsApp
+            document.getElementById('admin-whatsapp').addEventListener('input', function(e) {
+                CONFIG.whatsapp = e.target.value.replace(/\D/g, '');
+                e.target.value = CONFIG.whatsapp;
+            });
+
+            renderizarListaProdutos();
+        }
+
+        function carregarLogo(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    CONFIG.logo = e.target.result;
+                    document.getElementById('admin-logo-preview').innerHTML = `<img src="${e.target.result}" alt="Logo">`;
+                    document.getElementById('logo-display').innerHTML = `<img src="${e.target.result}" alt="Logo">`;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function aplicarTema() {
+            document.documentElement.style.setProperty('--cor-primaria', CONFIG.corPrimaria);
+            document.documentElement.style.setProperty('--cor-secundaria', CONFIG.corSecundaria);
+            document.getElementById('nome-empresa').textContent = CONFIG.nomeEmpresa;
+            
+            if (CONFIG.logo) {
+                document.getElementById('logo-display').innerHTML = `<img src="${CONFIG.logo}" alt="Logo">`;
+            } else {
+                document.getElementById('logo-display').innerHTML = '<span class="logo-placeholder">🍕</span>';
+            }
+        }
+
+        function alterarSenhaAdmin() {
+            const novaSenha = document.getElementById('admin-nova-senha').value.trim();
+            if (novaSenha.length < 4) {
+                alert('⚠️ A senha deve ter pelo menos 4 caracteres!');
+                return;
+            }
+            CONFIG.senhaAdmin = novaSenha;
+            alert('✅ Senha alterada com sucesso!');
+            document.getElementById('admin-nova-senha').value = '';
+        }
+
+        function fecharAdmin() {
+            document.getElementById('admin-panel').classList.add('hidden');
+        }
+
+        // Gerenciamento de Produtos
+        function mostrarFormProduto() {
+            document.getElementById('form-produto').classList.remove('hidden');
+        }
+
+        function cancelarProduto() {
+            document.getElementById('form-produto').classList.add('hidden');
+            limparFormProduto();
+        }
+
+        function limparFormProduto() {
+            document.getElementById('produto-nome').value = '';
+            document.getElementById('produto-descricao').value = '';
+            document.getElementById('produto-preco').value = '';
+            document.getElementById('produto-categoria').value = '';
+            document.getElementById('produto-imagem').value = '';
+        }
+
+        function adicionarProduto() {
+            const nome = document.getElementById('produto-nome').value.trim();
+            const descricao = document.getElementById('produto-descricao').value.trim();
+            const preco = parseFloat(document.getElementById('produto-preco').value);
+            const categoria = document.getElementById('produto-categoria').value.trim();
+            const imagem = document.getElementById('produto-imagem').value.trim() || '🍽️';
+
+            if (!nome || !descricao || !preco || !categoria) {
+                alert('⚠️ Preencha todos os campos!');
+                return;
+            }
+
+            const novoId = Math.max(...PRODUTOS.map(p => p.id), 0) + 1;
+            PRODUTOS.push({
+                id: novoId,
+                nome: nome,
+                descricao: descricao,
+                preco: preco,
+                categoria: categoria,
+                imagem: imagem
+            });
+
+            salvarProdutos();
+            limparFormProduto();
+            cancelarProduto();
+            renderizarListaProdutos();
+            renderizarProdutos();
+            renderizarCategorias();
+            alert('✅ Produto adicionado com sucesso!');
+        }
+
+        function removerProduto(id) {
+            if (confirm('Tem certeza que deseja remover este produto?')) {
+                PRODUTOS = PRODUTOS.filter(p => p.id !== id);
+                salvarProdutos();
+                renderizarListaProdutos();
+                renderizarProdutos();
+                renderizarCategorias();
+            }
+        }
+
+        function renderizarListaProdutos() {
+            const container = document.getElementById('lista-produtos');
+            container.innerHTML = PRODUTOS.map(p => `
+                <div class="produto-item">
+                    <div>
+                        <strong>${p.imagem} ${p.nome}</strong><br>
+                        <small style="color: #6b7280;">${p.categoria} - R$ ${p.preco.toFixed(2)}</small>
+                    </div>
+                    <button class="btn-delete" onclick="removerProduto(${p.id})">Remover</button>
+                </div>
+            `).join('');
+        }
+
+        // Permitir Enter na senha
+        document.addEventListener('DOMContentLoaded', function() {
+            const senhaInput = document.getElementById('senha-admin');
+            if (senhaInput) {
+                senhaInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        fazerLoginAdmin();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
