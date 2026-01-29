@@ -1,4 +1,4 @@
-[index_fixed.html](https://github.com/user-attachments/files/24941039/index_fixed.html)
+[Uploading index_fixed (1).html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -321,10 +321,20 @@
             bottom: 0;
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(4px);
-            z-index: 200;
+            z-index: 9999;
             display: flex;
             align-items: flex-end;
             justify-content: center;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         @media (min-width: 768px) {
@@ -1693,12 +1703,46 @@
             }
 
             modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Previne scroll
         }
 
         function fecharFormProduto() {
-            document.getElementById('form-produto-modal').classList.add('hidden');
+            const modal = document.getElementById('form-produto-modal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = ''; // Restaura scroll
             limparFormProduto();
         }
+
+        // Fechar modal ao clicar fora do conteúdo
+        document.addEventListener('DOMContentLoaded', function() {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(function(modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                        document.body.style.overflow = ''; // Restaura scroll
+                        if (modal.id === 'form-produto-modal') {
+                            limparFormProduto();
+                        }
+                    }
+                });
+            });
+
+            // Fechar modal com a tecla ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    modals.forEach(function(modal) {
+                        if (!modal.classList.contains('hidden')) {
+                            modal.classList.add('hidden');
+                            document.body.style.overflow = '';
+                            if (modal.id === 'form-produto-modal') {
+                                limparFormProduto();
+                            }
+                        }
+                    });
+                }
+            });
+        });
 
         function limparFormProduto() {
             document.getElementById('produto-nome').value = '';
